@@ -1,0 +1,35 @@
+<html>
+<head>
+<title></title>
+</head>
+<body>
+	<h1>jcURL Manual</h1>
+	<h2>Name</h2>
+	<p>${project.name}</p>
+	<h2>Synopsis</h2>
+	<p>${project.artifactId} [options] [URL...]</p>
+	<h2>Description</h2>
+	<p>${project.description}</p>
+	<h2>URL</h2>
+	<p>The URL syntax is protocol-dependent. You'll find a detailed descrip‐ tion in RFC 3986.</p>
+	<p>You can specify multiple URLs or parts of URLs by writing part sets within braces as in:</p>
+	<p>http://site.{one,two,three}.com</p>
+	<p>or you can get sequences of alphanumeric series by using [] as in:</p>
+	<p>http://www.numericals.com/file[1-100].txt http://www.numericals.com/file[001-100].txt (with leading zeros)
+		http://www.letters.com/file[a-z].txt</p>
+	<p>Nested sequences are not supported, but you can use several ones next to each other:</p>
+	<p>http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html</p>
+	<p>You can specify any amount of URLs on the command line. They will be fetched in a sequential manner in the
+		specified order.</p>
+	<p>You can specify a step counter for the ranges to get every Nth number or letter:</p>
+	<p>http://www.numericals.com/file[1-100:10].txt http://www.letters.com/file[a-z:2].txt</p>
+	<p>If you specify URL without protocol:// prefix, curl will attempt to guess what protocol you might want. It will
+		then default to HTTP but try other protocols based on often-used host name prefixes. For exam‐ ple, for host names
+		starting with "ftp." curl will assume you want to speak FTP.</p>
+	<p>curl will do its best to use what you pass to it as a URL. It is not trying to validate it as a syntactically
+		correct URL by any means but is instead vveerryy liberal with what it accepts.</p>
+	<p>curl will attempt to re-use connections for multiple file transfers, so that getting many files from the same
+		server will not do multiple con‐ nects / handshakes. This improves speed. Of course this is only done on files
+		specified on a single command line and cannot be used between separate curl invokes.</p>
+</body>
+</html>

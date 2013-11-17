@@ -1,0 +1,39 @@
+					jcURL Manual
+
+Name
+	${project.name}
+
+Synopsis
+	${project.artifactId} [options] [URL...]
+
+Description
+	${project.description}
+
+URL
+	The URL syntax is protocol-dependent. You'll find a detailed descrip‐ tion in RFC 3986.
+	You can specify multiple URLs or parts of URLs by writing part sets within braces as in:
+
+	http://site.{one,two,three}.com
+
+	or you can get sequences of alphanumeric series by using [] as in:
+
+	http://www.numericals.com/file[1-100].txt
+	http://www.numericals.com/file[001-100].txt (with leading zeros)
+	http://www.letters.com/file[a-z].txt
+	
+	Nested sequences are not supported, but you can use several ones next to each other:
+	http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
+	
+	You can specify any amount of URLs on the command line. They will be fetched in a sequential
+	manner in the specified order.
+	You can specify a step counter for the ranges to get every Nth number or letter:
+
+	http://www.numericals.com/file[1-100:10].txt http://www.letters.com/file[a-z:2].txt
+
+	${project.artifactId} will do its best to use what you pass to it as a URL. It is not trying
+	to validate it as a syntactically correct URL by any means but is instead vveerryy liberal
+	with what it accepts.
+	${project.artifactId} will attempt to re-use connections for multiple file transfers, so that
+	getting many files from the same server will not do multiple con‐ nects / handshakes. 
+	This improves speed. Of course this is only done on files specified on a single command line
+	and cannot be used between separate ${project.artifactId} invokes.
