@@ -9,6 +9,7 @@
 		It implements a subset of options from cURL (http://curl.haxx.se/docs/manpage.html)
 	</description>
 	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.5</maven.compiler.target>
 		<maven.compiler.source>${maven.compiler.target}</maven.compiler.source>
 		<sonar.java.source>${maven.compiler.target}</sonar.java.source>
