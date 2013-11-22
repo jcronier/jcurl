@@ -61,6 +61,7 @@ public class CliArgs {
 		options.addOption(this.createArgOption(INPUTFILE));
 		options.addOption(this.createArgOption(INPUTFILE_PATTERN));
 		options.addOption(this.createArgOption(INPUTFILE_TRANSFORM));
+		options.addOption(this.createArgOption(VERB));
 	}
 
 	protected Options getOptions() {
