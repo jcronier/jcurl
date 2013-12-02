@@ -4,12 +4,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -44,24 +50,31 @@ public class CliArgs {
 
 	static final String INPUTFILE_TRANSFORM = "inputTransform";
 
-	public static final CliArgs cliArgs = new CliArgs();
+	static final String PATCH_CONSOLE_ENCODING = "X_patchConsoleEncoding";
+
+	static final String SHOW_ENNV_PARAM = "X_showEnvParams";
 
 	private final ResourceBundle i18n;
 
 	private final Options options;
 
-	private CliArgs() {
+	private final PrintStream consoleOutput;
+
+	public CliArgs(final OutputStream consoleOutput) {
+		this.consoleOutput = new PrintStream(consoleOutput);
 		this.i18n = ResourceBundle.getBundle(Cli.class.getName());
 		this.options = new Options();
-		options.addOption(this.createOption(HELP));
-		options.addOption(this.createOption(VERSION));
-		options.addOption(this.createOption(MANUAL));
+		this.options.addOption(this.createOption(HELP));
+		this.options.addOption(this.createOption(VERSION));
+		this.options.addOption(this.createOption(MANUAL));
 		// groupInfo.addOption(this.createOption(PPRINT));
-		options.addOption(this.createOption(DISPLAYHEADER));
-		options.addOption(this.createArgOption(INPUTFILE));
-		options.addOption(this.createArgOption(INPUTFILE_PATTERN));
-		options.addOption(this.createArgOption(INPUTFILE_TRANSFORM));
-		options.addOption(this.createArgOption(VERB));
+		this.options.addOption(this.createOption(DISPLAYHEADER));
+		this.options.addOption(this.createOption(PATCH_CONSOLE_ENCODING));
+		this.options.addOption(this.createOption(SHOW_ENNV_PARAM));
+		this.options.addOption(this.createArgOption(INPUTFILE));
+		this.options.addOption(this.createArgOption(INPUTFILE_PATTERN));
+		this.options.addOption(this.createArgOption(INPUTFILE_TRANSFORM));
+		this.options.addOption(this.createArgOption(VERB));
 	}
 
 	protected Options getOptions() {
@@ -124,18 +137,52 @@ public class CliArgs {
 			if (manual == null) {
 				throw new FileNotFoundException("Unable to find '" + manualFile + "'");
 			}
-			AnsiConsole.systemInstall();
 			final String manualContent = IOUtils.toString(manual);
-			System.out.println(Ansi.ansi().eraseScreen().render(manualContent).reset());
+			AnsiConsole.systemInstall();
+			this.consoleOutput.println(Ansi.ansi().eraseScreen().render(manualContent).reset());
+			AnsiConsole.systemUninstall();
 		}
 		catch (final IOException e) {
 			LOG.error("Unable du display help usage", e);
 		}
 	}
 
+	public void showEnvParams() {
+		final String pad = "                              ";
+		final String sep = "\n======================================================\n\n";
+		String n;
+		AnsiConsole.systemInstall();
+		final StringBuilder sb = new StringBuilder();
+		sb.append("\n\n\n\nEnvironnement variables:").append(sep);
+		for (final Entry<String, String> e : new TreeMap<String, String>(System.getenv()).entrySet()) {
+			n = e.getKey();
+			sb.append("\n- ").append(n).append(pad.length() > n.length() ? pad.substring(n.length()) : "").append(": ")
+					.append(e.getValue());
+		}
+		sb.append("\n\n\n\nSystem properties:").append(sep);
+		for (final Entry<Object, Object> e : new TreeMap<Object, Object>(System.getProperties()).entrySet()) {
+			n = String.valueOf(e.getKey());
+			sb.append("\n- ").append(n).append(pad.length() > n.length() ? pad.substring(n.length()) : "").append(": ")
+					.append(e.getValue());
+		}
+		sb.append("\n\n\n\nDefault settings:").append(sep);
+		n = "System encoding";
+		sb.append("\n- ").append(n).append(pad.length() > n.length() ? pad.substring(n.length()) : "").append(": ")
+				.append(Charset.defaultCharset().name());
+		n = "Output encoding";
+		sb.append("\n- ").append(n).append(pad.length() > n.length() ? pad.substring(n.length()) : "").append(": ")
+				.append(ConsoleOutputFilter.getOutputEncoding(Charset.defaultCharset().name()));
+
+		// System.out.println(encoding + " " + (this.toTranscode ? "->to transcode"
+		// : ""));
+
+		this.consoleOutput.println(sb);
+		AnsiConsole.systemUninstall();
+	}
+
 	public void printUsage() {
 		final Options options = new Options();
-		for (final Option o : (Collection<Option>) cliArgs.getOptions().getOptions()) {
+		for (final Option o : (Collection<Option>) this.getOptions().getOptions()) {
 			options.addOption(o);
 		}
 		final HelpFormatter formatter = new HelpFormatter();
@@ -155,7 +202,9 @@ public class CliArgs {
 				, this.getString("usage.footer", "") //
 				);
 		pw.flush();
-		System.out.println(out.toString());
+		AnsiConsole.systemInstall();
+		this.consoleOutput.println(Ansi.ansi().a(out));
+		AnsiConsole.systemUninstall();
 	}
 
 	public boolean isHelp(final CommandLine cmd) {
@@ -164,9 +213,20 @@ public class CliArgs {
 
 	public Map<JcurlOption, String> getJcurlOptions(final CommandLine cmd) {
 		final Map<JcurlOption, String> opts = new LinkedHashMap<JcurlOption, String>();
+		if (cmd.hasOption(CliArgs.DISPLAYHEADER)) {
+			opts.put(JcurlOption.displayHeader, "true");
+		}
 		if (cmd.hasOption(CliArgs.PPRINT)) {
 			opts.put(JcurlOption.prettyPrint, "true");
 		}
 		return opts;
+	}
+
+	public static boolean isPatchConsoleEncodingEnabled(final String... arguments) {
+		return Arrays.asList(arguments).contains("-" + PATCH_CONSOLE_ENCODING);
+	}
+
+	public boolean isShowEnvParams(final CommandLine cmd) {
+		return cmd.hasOption(CliArgs.SHOW_ENNV_PARAM);
 	}
 }

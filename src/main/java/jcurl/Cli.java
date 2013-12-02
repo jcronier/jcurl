@@ -1,8 +1,7 @@
 package jcurl;
 
-import static jcurl.CliArgs.cliArgs;
-
 import java.io.FileReader;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +23,30 @@ public class Cli {
 
 	private final String[] arguments;
 
+	private final CliArgs cliArgs;
+
+	private final PrintStream consoleOutput;
+
 	/**
 	 * @param arguments
 	 * @throws Exception
 	 */
 	private Cli(final String... arguments) throws Exception {
 		this.arguments = arguments;
+		if (!CliArgs.isPatchConsoleEncodingEnabled(arguments)) {
+			this.consoleOutput = System.out;
+		}
+		else {
+			this.consoleOutput = new PrintStream(new ConsoleOutputFilter(System.out)) {
+
+				@Override
+				public void print(final String x) {
+					super.print(x);
+					super.flush();
+				}
+			};
+		}
+		this.cliArgs = new CliArgs(this.consoleOutput);
 	}
 
 	public static void main(final String... args) throws Exception {
@@ -50,23 +67,27 @@ public class Cli {
 
 	public Integer call() throws Exception {
 		if (this.arguments.length == 0) {
-			cliArgs.printUsage();
+			this.cliArgs.printUsage();
 			return 0;
 		}
 		final CommandLineParser parser = new GnuParser();
 		// create Options object
 		try {
-			final CommandLine cmd = parser.parse(cliArgs.getOptions(), this.arguments, true);
-			if (cliArgs.isHelp(cmd)) {
-				cliArgs.printUsage();
+			final CommandLine cmd = parser.parse(this.cliArgs.getOptions(), this.arguments, true);
+			if (this.cliArgs.isHelp(cmd)) {
+				this.cliArgs.printUsage();
+				return 0;
+			}
+			if (this.cliArgs.isShowEnvParams(cmd)) {
+				this.cliArgs.showEnvParams();
 				return 0;
 			}
 			if (cmd.hasOption(CliArgs.MANUAL)) {
-				cliArgs.printManual();
+				this.cliArgs.printManual();
 				return 0;
 			}
 			if (cmd.hasOption(CliArgs.VERSION)) {
-				Version.version.showVersion();
+				this.consoleOutput.println(Version.version.getVersion());
 				return 0;
 			}
 			final List<URL> urls;
@@ -87,16 +108,16 @@ public class Cli {
 			else {
 				urls = UriUtils.uriUtils.getUrls(cmd.getArgs());
 			}
-			final Map<JcurlOption, String> opts = cliArgs.getJcurlOptions(cmd);
+			final Map<JcurlOption, String> opts = this.cliArgs.getJcurlOptions(cmd);
 			final HttpMethod method = HttpMethod.valueOf(cmd.getOptionValue(CliArgs.VERB, "GET").toUpperCase());
-			final Jcurl jcurl = new Jcurl(method, opts);
+			final Jcurl jcurl = new Jcurl(method, opts, this.consoleOutput);
 			for (final URL url : urls) {
 				jcurl.run(url);
 			}
 		}
 		catch (final Exception e) {
 			System.err.println(e.getMessage());
-			cliArgs.printUsage();
+			this.cliArgs.printUsage();
 			throw e;
 		}
 		return 0;

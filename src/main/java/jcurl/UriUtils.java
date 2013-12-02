@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -49,17 +50,21 @@ public class UriUtils {
 
 	private static final String CODE_EQUAL_E = "%3D";
 
-	private static final String URL_ENCODING = "UTF-8";
-
-	public static final UriUtils uriUtils = new UriUtils();
-
 	private final Pattern PATTERN_LIST = Pattern.compile("\\{([^}]+)\\}");
 
 	private final Pattern PATTERN_RANGE_CAR = Pattern.compile("\\[([^\\]])-([^\\]])(:(\\d+))?\\]");
 
 	private final Pattern PATTERN_RANGE_NUMBER = Pattern.compile("\\[(\\d+)-(\\d+)(:(\\d+))?\\]");
 
-	private UriUtils() {
+	/**
+	 * Instance with default system encoding.
+	 */
+	public static final UriUtils uriUtils = new UriUtils(Charset.defaultCharset().name());
+
+	private final String encoding;
+
+	UriUtils(final String encoding) {
+		this.encoding = encoding;
 	}
 
 	public String decode(final String input) {
@@ -71,7 +76,7 @@ public class UriUtils {
 			return defaultResultValue;
 		}
 		try {
-			return URLDecoder.decode(input, URL_ENCODING);
+			return URLDecoder.decode(input, this.encoding);
 		}
 		catch (final UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -94,7 +99,7 @@ public class UriUtils {
 			return defaultResultValue;
 		}
 		try {
-			String result = URLEncoder.encode(input, URL_ENCODING);
+			String result = URLEncoder.encode(input, this.encoding);
 			result = result //
 					.replace(CODE_STAR_D, CODE_STAR_E) //
 					.replace(CODE_PLUS_D, CODE_PLUS_E) //
@@ -150,8 +155,8 @@ public class UriUtils {
 				if ((m.groupCount() > 3) && (m.group(4) != null)) {
 					step = Integer.parseInt(m.group(4));
 				}
-				final int leading = ((startStr.length() > 1) && (startStr.length() == m.group(2).length()) && startStr.startsWith("0")) ? startStr.length()
-						: 0;
+				final int leading = ((startStr.length() > 1) && (startStr.length() == m.group(2).length()) && startStr
+						.startsWith("0")) ? startStr.length() : 0;
 				if (leading > 0) {
 					for (long i = start; i <= end; i += step) {
 						final String subst = StringUtils.leftPad(String.valueOf(i), leading, "0");

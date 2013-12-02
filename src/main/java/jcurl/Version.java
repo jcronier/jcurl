@@ -17,7 +17,7 @@ public class Version {
 	private Version() {
 	}
 
-	public void showVersion() {
+	public String getVersion() {
 		try {
 			final Properties p = new Properties();
 			p.load(ClassLoader.getSystemResourceAsStream(FILE_VERSION));
@@ -27,10 +27,11 @@ public class Version {
 			s.append(" ");
 			s.append(p.getProperty("version"));
 
-			System.out.println(s);
+			return s.toString();
 		}
 		catch (final IOException e) {
 			LOG.error("Unable to find file version: '{}'", FILE_VERSION);
 		}
+		return null;
 	}
 }

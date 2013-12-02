@@ -4,14 +4,18 @@ import static org.fusesource.jansi.Ansi.ansi;
 import static org.fusesource.jansi.Ansi.Color.BLACK;
 import static org.fusesource.jansi.Ansi.Color.WHITE;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.io.IOUtils;
 
@@ -69,12 +73,26 @@ public class ResponseViewer {
 	public void printBody(final HttpURLConnection connection) throws IOException {
 		InputStream input = null;
 		try {
-			input = connection.getInputStream();
+			input = getInputStream(connection);
 			this.print(input);
 		}
 		finally {
 			IOUtils.closeQuietly(input);
 		}
+	}
+
+	public static BufferedInputStream getInputStream(final URLConnection connection) throws IOException {
+		final String contentEncoding = connection.getContentEncoding();
+
+		if ((contentEncoding != null) && contentEncoding.equalsIgnoreCase("gzip")) {
+			return new BufferedInputStream(new GZIPInputStream(connection.getInputStream()));
+		}
+
+		if ((contentEncoding != null) && contentEncoding.equalsIgnoreCase("deflate")) {
+			return new BufferedInputStream(new InflaterInputStream(connection.getInputStream()));
+		}
+
+		return new BufferedInputStream(connection.getInputStream());
 	}
 
 	public void print(final InputStream input) throws IOException {

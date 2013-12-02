@@ -35,6 +35,11 @@ http://any.org/archive-[1996-1999]/vol-[1-4]/part-{a,b,c}.html
 
 You can specify any amount of URLs on the command line.
 
+Each URL is encoding with default system charset. To encode in specific chareset, launch jcurl with JVM parameter -Dfile.encoding for example:
+
+   java -Dfile.encoding=ISO-8859-1 -jar jcurl.jar [options] [URL...]
+
+
 Options
 =======
 

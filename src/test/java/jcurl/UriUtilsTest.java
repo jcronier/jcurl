@@ -6,13 +6,18 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UriUtilsTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(UriUtilsTest.class);
 
 	@Test
 	public void testGetUrls_rangeNumber() throws MalformedURLException {
@@ -176,8 +181,9 @@ public class UriUtilsTest {
 
 	@Test
 	public void testEncodeCompleteUrlString() {
-		final String input = "http://10.111.228.28:8082/crtype/create?crTypeName=TEST&description=Test type avec jcurl (description avec espace et caractères spéciaux)";
-		final String expected = "http://10.111.228.28:8082/crtype/create?crTypeName=TEST&description=Test%20type%20avec%20jcurl%20%28description%20avec%20espace%20et%20caract%C3%A8res%20sp%C3%A9ciaux%29";
-		assertEquals(expected, UriUtils.uriUtils.encodeCompleteUrl(input));
+		final String input = "http://foo.com/search?type=TEST&description=Test with jcurl (description avec espace et caract\u00E8res sp\u00E9ciaux)";
+		final String expectedInUtf8 = "http://foo.com/search?type=TEST&description=Test%20with%20jcurl%20%28description%20avec%20espace%20et%20caract%C3%A8res%20sp%C3%A9ciaux%29";
+		LOG.info("Default charset: {}", Charset.defaultCharset());
+		assertEquals(expectedInUtf8, new UriUtils("UTF-8").encodeCompleteUrl(input));
 	}
 }

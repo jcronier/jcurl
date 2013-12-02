@@ -19,11 +19,14 @@ public class Jcurl {
 
 	private final ResponseViewer output;
 
-	public Jcurl(final HttpMethod method, final Map<JcurlOption, String> opts) {
+	private final OutputStream consoleOutput;
+
+	public Jcurl(final HttpMethod method, final Map<JcurlOption, String> opts, final OutputStream output) {
 		this.method = method;
 		this.opts = opts;
+		this.consoleOutput = output;
 		AnsiConsole.systemInstall();
-		this.output = new ResponseViewer(new OutputStreamWriter(System.out), opts);
+		this.output = new ResponseViewer(new OutputStreamWriter(this.consoleOutput), opts);
 	}
 
 	public void run(final URL url) {
