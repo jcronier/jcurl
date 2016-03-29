@@ -2,6 +2,8 @@ package jcurl;
 
 import java.io.FileReader;
 import java.io.PrintStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,11 @@ public class Cli {
 			};
 		}
 		this.cliArgs = new CliArgs(this.consoleOutput);
+		this.sessionSetup();
+	}
+
+	private void sessionSetup() {
+		CookieHandler.setDefault(new CookieManager());
 	}
 
 	public static void main(final String... args) throws Exception {
