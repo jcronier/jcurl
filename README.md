@@ -35,9 +35,23 @@ http://any.org/archive-[1996-1999]/vol-[1-4]/part-{a,b,c}.html
 
 You can specify any amount of URLs on the command line.
 
-Each URL is encoding with default system charset. To encode in specific chareset, launch jcurl with JVM parameter -Dfile.encoding for example:
+Each URL is encoding with default system charset. To encode in specific chareset, launch jcurl with JVM parameter `-Dfile.encoding` for example:
 
+```bash
    java -Dfile.encoding=ISO-8859-1 -jar jcurl.jar [options] [URL...]
+```
+
+## SSL Communication 
+After compiling, you will get the `jcurl-1-SNAPSHOT-BUNDLE.jar`, use: 
+
+```bash
+java -Djavax.net.debug=ssl  \ 
+     -Djavax.net.ssl.trustStore=/home/xxx/cacerts  \  # here is jks type of CA
+     -Djavax.net.ssl.trustStorePassword=ChangeThePwd  \ 
+     -Djavax.net.ssl.keyStore=/home/xxx/tls.jks  \    # here is jks type of client cert 
+     -Djavax.net.ssl.keyStorePassword=ChangeThePwd \ 
+     -jar jcurl-1-SNAPSHOT-BUNDLE.jar  https://xxxx.domain.com/xxxx/service
+```
 
 
 Options
