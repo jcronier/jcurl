@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -euo pipefail
+
 __BASEDIR="$(readlink -f "$(dirname "$0")")";if [[ -z "$__BASEDIR" ]]; then echo "__BASEDIR: undefined";exit 1;fi
 
 _trustStoreLocations=(
@@ -23,7 +26,7 @@ _trustStoreLocations=(
   # NetBSD
   "/etc/openssl/certs"
 )
-systemTrustore() {
+printSystemTrustStore() {
   for _trustStoreLocationToCheck in "${_trustStoreLocations[@]}"
   do
     if [[ -r "$_trustStoreLocationToCheck" ]]; then
@@ -32,31 +35,40 @@ systemTrustore() {
   done
 }
 
-
 main(){
   # Setup with system properties for proxy and trust/key store
-  local jcurlOpts="$JCURL_OPTS -Djava.net.useSystemProxies=true"
+  local jcurlOpts=(${JCURL_OPTS:-})
+  jcurlOpts+=(-Djava.net.useSystemProxies=true)
 
-  local systemTustStore=`systemTrustore`
-  if [[ "$OS"  == Windows*  ]];then
-    jcurlOpts="$jcurlOpts
-    	-Djava.net.useSystemProxies=true
-    	-Djavax.net.ssl.trustStoreType=Windows-ROOT
-    	-Djavax.net.ssl.trustStore=NONE
-    	-Djavax.net.ssl.keyStoreType=Windows-MY
-    	-Djavax.net.ssl.keyStore=NONE
-	"
-  elif [[ ! -f "$systemTustStore" ]]; then
-    jcurlOpts="$jcurlOpts -Djavax.net.ssl.trustStoreType=PKCS12 -Djavax.net.ssl.trustStore=$systemTustStore"
+  local systemTrustStore=""
+  systemTrustStore="$(printSystemTrustStore)"
+  if [[ "${OS:-}" == Windows*  ]];then
+    jcurlOpts+=(-Djavax.net.ssl.trustStoreType=Windows-ROOT)
+    jcurlOpts+=(-Djavax.net.ssl.trustStore=NONE)
+    jcurlOpts+=(-Djavax.net.ssl.keyStoreType=Windows-MY)
+    jcurlOpts+=(-Djavax.net.ssl.keyStore=NONE)
+  elif [[ "${OSTYPE:-}" == 'darwin'* ]]; then
+    # //FIXME: trustStoreType=KeychainStore seems to not work
+    #jcurlOpts+=(-Djavax.net.ssl.trustStoreType=KeychainStore)
+    jcurlOpts+=(-Djavax.net.ssl.keyStoreType=KeychainStore)
+  elif [[ ! -f "$systemTrustStore" ]]; then
+    jcurlOpts+=(-Djavax.net.ssl.trustStoreType=PKCS12)
+    jcurlOpts+=("-Djavax.net.ssl.trustStore=$systemTrustStore")
   fi
 
-  if [[ ! -x "${JAVA_HOME}\bin\java" ]]; then
-    echo "invalid JAVA_HOME"
-    return 1
+  local javaCmd="${JAVA_HOME:-}/bin/java"
+
+  if [[ ! -x "${javaCmd}" ]]; then
+    if which java &> /dev/null; then
+      javaCmd="java"
+    else
+      echo "invalid JAVA_HOME"
+      return 1
+    fi
   fi
 
   local jarFile=`ls "$__BASEDIR/target/"jcurl-*-bundle.jar | sort | tail -1`
-  "${JAVA_HOME}\bin\java" ${jcurlOpts} -jar "$jarFile" "$@"
+  "${javaCmd}" "${jcurlOpts[@]}" -jar "$jarFile" "$@"
   return $?
 }
 
