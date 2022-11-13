@@ -1,5 +1,5 @@
 package jcurl;
 
 public enum JcurlOption {
-	file, displayHeader, prettyPrint;
+	file, displayHeader, prettyPrint, followRedirect;
 }

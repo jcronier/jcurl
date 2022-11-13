@@ -21,8 +21,11 @@ public class Jcurl {
 
 	private final OutputStream consoleOutput;
 
+	private boolean followRedirect;
+
 	public Jcurl(final HttpMethod method, final Map<JcurlOption, String> opts, final OutputStream output) {
 		this.method = method;
+        this.followRedirect = Boolean.valueOf(opts.get(JcurlOption.followRedirect));
 		this.opts = opts;
 		this.consoleOutput = output;
 		AnsiConsole.systemInstall();
@@ -32,6 +35,7 @@ public class Jcurl {
 	public void run(final URL url) {
 		try {
 			final HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			c.setInstanceFollowRedirects(this.followRedirect);
 			c.setRequestMethod(this.method.toString());
 			if (this.method == HttpMethod.GET) {
 				this.doGet(c);

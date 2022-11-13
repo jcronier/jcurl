@@ -34,27 +34,29 @@ public class CliArgs {
 
 	private static final String PARAM_PREFIX = "param.";
 
-	static final String DISPLAYHEADER = "i";
+	static final String DISPLAY_HEADER = "i";
+
+	static final String FOLLOW_REDIRECT = "L";
 
 	static final String HELP = "h";
 
 	static final String MANUAL = "manual";
 
-	static final String PPRINT = "pp";
+	static final String PRETTY_PRINT = "pp";
 
 	static final String VERB = "X";
 
 	static final String VERSION = "V";
 
-	static final String INPUTFILE = "inputFile";
+	static final String INPUT_FILE = "inputFile";
 
-	static final String INPUTFILE_PATTERN = "inputPattern";
+	static final String INPUT_FILE_PATTERN = "inputPattern";
 
-	static final String INPUTFILE_TRANSFORM = "inputTransform";
+	static final String INPUT_FILE_TRANSFORM = "inputTransform";
 
 	static final String PATCH_CONSOLE_ENCODING = "X_patchConsoleEncoding";
 
-	static final String SHOW_ENNV_PARAM = "X_showEnvParams";
+	static final String SHOW_ENV_PARAM = "X_showEnvParams";
 
 	private final ResourceBundle i18n;
 
@@ -69,13 +71,14 @@ public class CliArgs {
 		this.options.addOption(this.createOption(HELP));
 		this.options.addOption(this.createOption(VERSION));
 		this.options.addOption(this.createOption(MANUAL));
+		this.options.addOption(this.createOption(FOLLOW_REDIRECT));
 		// groupInfo.addOption(this.createOption(PPRINT));
-		this.options.addOption(this.createOption(DISPLAYHEADER));
+		this.options.addOption(this.createOption(DISPLAY_HEADER));
 		this.options.addOption(this.createOption(PATCH_CONSOLE_ENCODING));
-		this.options.addOption(this.createOption(SHOW_ENNV_PARAM));
-		this.options.addOption(this.createArgOption(INPUTFILE));
-		this.options.addOption(this.createArgOption(INPUTFILE_PATTERN));
-		this.options.addOption(this.createArgOption(INPUTFILE_TRANSFORM));
+		this.options.addOption(this.createOption(SHOW_ENV_PARAM));
+		this.options.addOption(this.createArgOption(INPUT_FILE));
+		this.options.addOption(this.createArgOption(INPUT_FILE_PATTERN));
+		this.options.addOption(this.createArgOption(INPUT_FILE_TRANSFORM));
 		this.options.addOption(this.createArgOption(VERB));
 	}
 
@@ -115,10 +118,7 @@ public class CliArgs {
 			final String str = this.i18n.getString(key);
 			return Integer.parseInt(str);
 		}
-		catch (final MissingResourceException e) {
-			return defaultValue;
-		}
-		catch (final NumberFormatException e) {
+        catch (final MissingResourceException | NumberFormatException e) {
 			return defaultValue;
 		}
 	}
@@ -213,11 +213,14 @@ public class CliArgs {
 
 	public Map<JcurlOption, String> getJcurlOptions(final CommandLine cmd) {
 		final Map<JcurlOption, String> opts = new LinkedHashMap<>();
-		if (cmd.hasOption(CliArgs.DISPLAYHEADER)) {
+		if (cmd.hasOption(CliArgs.DISPLAY_HEADER)) {
 			opts.put(JcurlOption.displayHeader, "true");
 		}
-		if (cmd.hasOption(CliArgs.PPRINT)) {
+		if (cmd.hasOption(CliArgs.PRETTY_PRINT)) {
 			opts.put(JcurlOption.prettyPrint, "true");
+		}
+		if (cmd.hasOption(CliArgs.FOLLOW_REDIRECT)) {
+			opts.put(JcurlOption.followRedirect, "true");
 		}
 		return opts;
 	}
@@ -227,6 +230,6 @@ public class CliArgs {
 	}
 
 	public boolean isShowEnvParams(final CommandLine cmd) {
-		return cmd.hasOption(CliArgs.SHOW_ENNV_PARAM);
+		return cmd.hasOption(CliArgs.SHOW_ENV_PARAM);
 	}
 }
