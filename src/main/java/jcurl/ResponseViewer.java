@@ -56,7 +56,7 @@ public class ResponseViewer {
 		for (final Entry<String, List<String>> e : connection.getHeaderFields().entrySet()) {
 			final String key = e.getKey();
 			if (key != null) {
-				out.append(key).append(":").append(NL).append("\t");
+				out.append(key).append(": ");
 			}
 			final List<String> value = e.getValue();
 			if ((value != null) && (value.size() == 1)) {
