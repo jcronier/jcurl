@@ -1,22 +1,5 @@
 package jcurl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.TreeMap;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -28,9 +11,28 @@ import org.fusesource.jansi.AnsiConsole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.TreeMap;
+
 public class CliArgs {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CliArgs.class);
+
+	private static final String PARAM_PREFIX = "param.";
 
 	static final String DISPLAYHEADER = "i";
 
@@ -90,9 +92,9 @@ public class CliArgs {
 	}
 
 	protected Option createOption(final String param, final boolean hasArg) {
-		final String description = this.getString("param." + param + ".description", null);
-		final String longOpt = this.getString("param." + param + ".long", null);
-		final String argName = this.getString("param." + param + ".argname", null);
+		final String description = this.getString(PARAM_PREFIX + param + ".description", null);
+		final String longOpt = this.getString(PARAM_PREFIX + param + ".long", null);
+		final String argName = this.getString(PARAM_PREFIX + param + ".argname", null);
 		if (hasArg) {
 			OptionBuilder.hasArg();
 		}
@@ -131,18 +133,16 @@ public class CliArgs {
 	}
 
 	public void printManual() {
-		final String manualFile = this.getString("manual", null);
-		try {
-			final InputStream manual = ClassLoader.getSystemResourceAsStream(manualFile);
+		final String manualFile = this.getString(MANUAL, null);
+		try (final InputStream manual = ClassLoader.getSystemResourceAsStream(manualFile)) {
 			if (manual == null) {
 				throw new FileNotFoundException("Unable to find '" + manualFile + "'");
 			}
-			final String manualContent = IOUtils.toString(manual);
+			final String manualContent = IOUtils.toString(manual, StandardCharsets.UTF_8);
 			AnsiConsole.systemInstall();
 			this.consoleOutput.println(Ansi.ansi().eraseScreen().render(manualContent).reset());
 			AnsiConsole.systemUninstall();
-		}
-		catch (final IOException e) {
+		} catch (final IOException e) {
 			LOG.error("Unable du display help usage", e);
 		}
 	}
@@ -181,9 +181,9 @@ public class CliArgs {
 	}
 
 	public void printUsage() {
-		final Options options = new Options();
-		for (final Option o : (Collection<Option>) this.getOptions().getOptions()) {
-			options.addOption(o);
+		final Options opts = new Options();
+		for (final Option o : this.getOptions().getOptions()) {
+			opts.addOption(o);
 		}
 		final HelpFormatter formatter = new HelpFormatter();
 		// formatter.setLeftPadding(4);
@@ -196,11 +196,11 @@ public class CliArgs {
 		formatter.printHelp(pw, 80 //
 				, this.getString("usage.cmdLineSyntax", "") //
 				, this.getString("usage.header", "") //
-				, options //
+				, opts //
 				, this.getInt("usage.leftPad", 1) //
 				, this.getInt("usage.descPad", 1) //
 				, this.getString("usage.footer", "") //
-				);
+		);
 		pw.flush();
 		AnsiConsole.systemInstall();
 		this.consoleOutput.println(Ansi.ansi().a(out));
@@ -212,7 +212,7 @@ public class CliArgs {
 	}
 
 	public Map<JcurlOption, String> getJcurlOptions(final CommandLine cmd) {
-		final Map<JcurlOption, String> opts = new LinkedHashMap<JcurlOption, String>();
+		final Map<JcurlOption, String> opts = new LinkedHashMap<>();
 		if (cmd.hasOption(CliArgs.DISPLAYHEADER)) {
 			opts.put(JcurlOption.displayHeader, "true");
 		}

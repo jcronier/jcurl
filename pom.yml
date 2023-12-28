@@ -13,6 +13,7 @@ description: >
 
 properties:
   maven.compiler.target: 1.6
+  maven.compiler.target: 1.8
   project.build.sourceEncoding: UTF-8
   project.reporting.outputEncoding: ${project.build.sourceEncoding}
   maven.compiler.encoding: ${project.build.sourceEncoding}
@@ -21,13 +22,13 @@ properties:
   sonar.java.target: ${maven.compiler.target}
 
 dependencies:
-- {groupId: commons-cli, artifactId: commons-cli, version: '[1.2,1.3)'}
-- {groupId: junit, artifactId: junit, version: '[4.11,4.12)', scope: test}
-- {groupId: commons-io, artifactId: commons-io, version: '[2.4,2.5)'}
-- {groupId: org.apache.commons, artifactId: commons-lang3, version: '[3.1,3.2)'}
-- {groupId: org.slf4j, artifactId: slf4j-api, version: '[1.7,1.8)'}
-- {groupId: org.slf4j, artifactId: slf4j-simple, version: '[1.7,1.8)'}
-- {groupId: org.fusesource.jansi, artifactId: jansi, version: 1.11}
+- {groupId: commons-cli, artifactId: commons-cli, version: 1.5.0}
+- {groupId: junit, artifactId: junit, version: 4.13.2, scope: test}
+- {groupId: commons-io, artifactId: commons-io, version: 2.11.0}
+- {groupId: org.apache.commons, artifactId: commons-lang3, version: 3.12.0}
+- {groupId: org.slf4j, artifactId: slf4j-api, version: 1.7.36}
+- {groupId: org.slf4j, artifactId: slf4j-simple, version: 1.7.36}
+- {groupId: org.fusesource.jansi, artifactId: jansi, version: 2.4.0}
 
 build:
   resources:
