@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class Cli {
             this.cliArgs.printUsage();
             return 0;
         }
-        final CommandLineParser parser = new GnuParser();
+        final CommandLineParser parser = new DefaultParser();
         // create Options object
         try {
             final CommandLine cmd = parser.parse(this.cliArgs.getOptions(), this.arguments, true);
@@ -91,15 +91,16 @@ public class Cli {
             final List<URL> urls;
             if (cmd.hasOption(CliArgs.INPUT_FILE)) {
                 final String inputFile = cmd.getOptionValue(CliArgs.INPUT_FILE);
-                final FileReader reader = new FileReader(inputFile);
-                if (!cmd.hasOption(CliArgs.INPUT_FILE_PATTERN)) {
-                    urls = UriUtils.uriUtils.getUrls(IOUtils.readLines(reader).toArray(new String[0]));
-                } else {
-                    urls = UriUtils.uriUtils.getUrls( //
-                            reader //
-                            , Pattern.compile(cmd.getOptionValue(CliArgs.INPUT_FILE_PATTERN)) //
-                            , cmd.getOptionValue(CliArgs.INPUT_FILE_TRANSFORM) //
-                    );
+                try (FileReader reader = new FileReader(inputFile)) {
+                    if (!cmd.hasOption(CliArgs.INPUT_FILE_PATTERN)) {
+                        urls = UriUtils.uriUtils.getUrls(IOUtils.readLines(reader).toArray(new String[0]));
+                    } else {
+                        urls = UriUtils.uriUtils.getUrls( //
+                                reader //
+                                , Pattern.compile(cmd.getOptionValue(CliArgs.INPUT_FILE_PATTERN)) //
+                                , cmd.getOptionValue(CliArgs.INPUT_FILE_TRANSFORM) //
+                        );
+                    }
                 }
             } else {
                 urls = UriUtils.uriUtils.getUrls(cmd.getArgs());

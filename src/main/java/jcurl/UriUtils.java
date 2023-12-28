@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -180,7 +181,7 @@ public class UriUtils {
 			}
 			final String urlEncoded = UriUtils.uriUtils.encodeCompleteUrl(urlStr);
 			try {
-				final URL u = new URL(urlEncoded);
+				final URL u = URI.create(urlEncoded).toURL();
 				result.add(u);
 			}
 			catch (final MalformedURLException e) {
@@ -191,7 +192,7 @@ public class UriUtils {
 	}
 
 	protected List<URL> getUrls(final Reader input, final Pattern pattern, final String replace) throws IOException {
-		final List<URL> result = new ArrayList<URL>();
+		final List<URL> result = new ArrayList<>();
 		if (input == null) {
 			return result;
 		}
@@ -204,7 +205,7 @@ public class UriUtils {
 	}
 
 	protected List<URL> getUrls(final String lineStr, final Pattern pattern, final String replace) throws IOException {
-		final List<URL> result = new ArrayList<URL>();
+		final List<URL> result = new ArrayList<>();
 		final String line;
 		final Matcher m = pattern.matcher(lineStr);
 		if (!m.find()) {

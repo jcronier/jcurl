@@ -67,7 +67,8 @@ main(){
     fi
   fi
 
-  local jarFile=`ls "$__BASEDIR/target/"jcurl-*-bundle.jar | sort | tail -1`
+  local jarFile=""
+  jarFile="$(find "$__BASEDIR/target" -name 'jcurl-*-bundle.jar' | sort | tail -1)"
   "${javaCmd}" "${jcurlOpts[@]}" -jar "$jarFile" "$@"
   return $?
 }

@@ -3,7 +3,6 @@ package jcurl;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
 import org.fusesource.jansi.Ansi;
@@ -98,19 +97,20 @@ public class CliArgs {
 		final String description = this.getString(PARAM_PREFIX + param + ".description", null);
 		final String longOpt = this.getString(PARAM_PREFIX + param + ".long", null);
 		final String argName = this.getString(PARAM_PREFIX + param + ".argname", null);
+		Option.Builder builder = Option.builder(param);
 		if (hasArg) {
-			OptionBuilder.hasArg();
+			builder.hasArg();
 		}
 		if (description != null) {
-			OptionBuilder.withDescription(description);
+			builder.desc(description);
 		}
 		if (longOpt != null) {
-			OptionBuilder.withLongOpt(longOpt);
+			builder.longOpt(longOpt);
 		}
 		if (argName != null) {
-			OptionBuilder.withArgName(argName);
+			builder.argName(argName);
 		}
-		return OptionBuilder.create(param);
+		return builder.build();
 	}
 
 	private int getInt(final String key, final int defaultValue) {

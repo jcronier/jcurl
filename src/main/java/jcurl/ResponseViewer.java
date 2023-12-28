@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +22,7 @@ import org.apache.commons.io.IOUtils;
 
 public class ResponseViewer {
 
-	private static final String NL = System.getProperty("line.separator");
+	private static final String NL = System.lineSeparator();
 
 	private final Writer output;
 
@@ -96,7 +97,7 @@ public class ResponseViewer {
 	}
 
 	public void print(final InputStream input) throws IOException {
-		IOUtils.copy(input, this.output);
+		IOUtils.copy(input, this.output, Charset.defaultCharset());
 		this.output.flush();
 	}
 
