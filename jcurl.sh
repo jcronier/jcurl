@@ -55,7 +55,7 @@ main(){
     return 1
   fi
 
-  local jarFile=`ls "$__BASEDIR/target/"jcurl-*-BUNDLE.jar | sort | tail -1`
+  local jarFile=`ls "$__BASEDIR/target/"jcurl-*-bundle.jar | sort | tail -1`
   "${JAVA_HOME}\bin\java" ${jcurlOpts} -jar "$jarFile" "$@"
   return $?
 }

@@ -42,7 +42,7 @@ Each URL is encoding with default system charset. To encode in specific chareset
 ```
 
 ## SSL Communication 
-After compiling, you will get the `jcurl-1-SNAPSHOT-BUNDLE.jar`, use: 
+After compiling, you will get the `jcurl-1-SNAPSHOT-bundle.jar`, use: 
 
 ```bash
 java -Djavax.net.debug=ssl  \ 
@@ -50,7 +50,7 @@ java -Djavax.net.debug=ssl  \
      -Djavax.net.ssl.trustStorePassword=ChangeThePwd  \ 
      -Djavax.net.ssl.keyStore=/home/xxx/tls.jks  \    # here is jks type of client cert 
      -Djavax.net.ssl.keyStorePassword=ChangeThePwd \ 
-     -jar jcurl-1-SNAPSHOT-BUNDLE.jar  https://xxxx.domain.com/xxxx/service
+     -jar jcurl-1-SNAPSHOT-bundle.jar  https://xxxx.domain.com/xxxx/service
 ```
 
 
