@@ -1,7 +1,7 @@
 modelEncoding: UTF-8
 modelVersion: 4.0.0
 
-groupId: jcurl
+groupId: io.github.jycr
 artifactId: jcurl
 version: ${revision}
 packaging: jar
@@ -11,8 +11,38 @@ description: >
   Java implementation of a "cURL like" (Client URL Request Library) software.
   It implements a subset of options from cURL (http://curl.haxx.se/docs/manpage.html)
 
+url: https://github.com/jycr/jcurl
+
+inceptionYear: 2023
+
+organization:
+  name: jycr
+  url: https://github.com/jycr
+
+licenses:
+  - name: Apache-2.0
+    distribution: repo
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+# Mandatory information to be able to publish to Maven Central:
+# https://central.sonatype.org/publish/requirements/#developer-information
+developers:
+  - name: JY Cr
+    email: jycr@users.noreply.github.com
+    organization: jycr
+    organizationUrl: https://github.com/jycr
+
+scm:
+  connection: scm:git:https://github.com/jycr/jcurl
+  developerConnection: scm:git:https://github.com/jycr/jcurl
+  url: https://github.com/jycr/jcurl
+
+issueManagement:
+  system: GitHub
+  url: https://github.com/jycr/jcurl/issues
+
 properties:
-  maven.compiler.target: 1.8
+  maven.compiler.release: 8
   # Default version when maven-git-versioning-extension is deactivated
   # cf. https://github.com/qoomon/maven-git-versioning-extension#intellij&#45;&#45;-multi-modules-projects
   revision: main-SNAPSHOT
@@ -21,71 +51,106 @@ properties:
   project.build.sourceEncoding: UTF-8
   project.reporting.outputEncoding: ${project.build.sourceEncoding}
   maven.compiler.encoding: ${project.build.sourceEncoding}
-  maven.compiler.source: ${maven.compiler.target}
-  sonar.java.source: ${maven.compiler.target}
+  maven.compiler.source: 1.${maven.compiler.release}
+  maven.compiler.target: ${maven.compiler.source}
+  sonar.java.source: ${maven.compiler.source}
   sonar.java.target: ${maven.compiler.target}
 
 dependencies:
-- {groupId: commons-cli, artifactId: commons-cli, version: 1.6.0}
-- {groupId: junit, artifactId: junit, version: 4.13.2, scope: test}
-- {groupId: commons-io, artifactId: commons-io, version: 2.15.1}
-- {groupId: org.apache.commons, artifactId: commons-lang3, version: 3.14.0}
-- {groupId: org.slf4j, artifactId: slf4j-api, version: 2.0.9}
-- {groupId: org.slf4j, artifactId: slf4j-simple, version: 2.0.9}
-- {groupId: org.fusesource.jansi, artifactId: jansi, version: 2.4.1}
+  - { groupId: commons-cli, artifactId: commons-cli, version: 1.6.0 }
+  - { groupId: junit, artifactId: junit, version: 4.13.2, scope: test }
+  - { groupId: commons-io, artifactId: commons-io, version: 2.15.1 }
+  - { groupId: org.apache.commons, artifactId: commons-lang3, version: 3.14.0 }
+  - { groupId: org.slf4j, artifactId: slf4j-api, version: 2.0.9 }
+  - { groupId: org.slf4j, artifactId: slf4j-simple, version: 2.0.9 }
+  - { groupId: org.fusesource.jansi, artifactId: jansi, version: 2.4.1 }
 
 build:
   resources:
-  - directory: src/main/resources
-    filtering: true
+    - directory: src/main/resources
+      filtering: true
   plugins:
-  - groupId: org.apache.maven.plugins
-    artifactId: maven-enforcer-plugin
-    version: 3.4.1
-    executions:
-    - id: enforce-project-requirements
-      goals:
-      - enforce
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-enforcer-plugin
+      version: 3.4.1
+      executions:
+        - id: enforce-project-requirements
+          goals:
+            - enforce
+          configuration:
+            rules:
+              requireJavaVersion:
+                # maven-git-versioning-extension is compatible with Java >= 11
+                version: 11
+              requireMavenVersion:
+                version: 3.8
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+      version: 3.12.1
       configuration:
-        rules:
-          requireJavaVersion:
-            # maven-git-versioning-extension is compatible with Java >= 11
-            version: 11
-          requireMavenVersion:
-            version: 3.8
-  - groupId: org.apache.maven.plugins
-    artifactId: maven-compiler-plugin
-    version: 3.12.1
-    configuration:
-      compilerArgs:
-        arg: '-Xlint:all'
-  - groupId: org.apache.maven.plugins
-    artifactId: maven-resources-plugin
-    version: 3.3.1
-    executions:
-    - id: copy-resources
-      inherited: true
-      phase: validate
-      goals:
-      - copy-resources
-      configuration:
-        outputDirectory: ${project.build.outputDirectory}/META-INF/maven/${project.groupId}/${project.artifactId}
-        resources:
-        - directory: ${basedir}
-          includes:
-          - README.md
-          filtering: false
-  - groupId: org.apache.maven.plugins
-    artifactId: maven-shade-plugin
-    version: 3.5.1
-    executions:
-    - phase: package
-      goals:
-      - shade
-      configuration:
-          shadedArtifactAttached: true
-          shadedClassifierName: bundle
-          transformers:
-          - attr/implementation: org.apache.maven.plugins.shade.resource.ManifestResourceTransformer
-            mainClass: jcurl.Cli
-          - attr/implementation: org.apache.maven.plugins.shade.resource.ServicesResourceTransformer
+        compilerArgs:
+          arg: '-Xlint:all'
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-resources-plugin
+      version: 3.3.1
+      executions:
+        - id: copy-resources
+          inherited: true
+          phase: validate
+          goals:
+            - copy-resources
+          configuration:
+            outputDirectory: ${project.build.outputDirectory}/META-INF/maven/${project.groupId}/${project.artifactId}
+            resources:
+              - directory: ${basedir}
+                includes:
+                  - README.md
+                filtering: false
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-shade-plugin
+      version: 3.5.1
+      executions:
+        - phase: package
+          goals:
+            - shade
+          configuration:
+            shadedArtifactAttached: true
+            shadedClassifierName: bundle
+            transformers:
+              - attr/implementation: org.apache.maven.plugins.shade.resource.ManifestResourceTransformer
+                mainClass: jcurl.Cli
+              - attr/implementation: org.apache.maven.plugins.shade.resource.ServicesResourceTransformer
+
+profiles:
+  - id: maven-central-publishing
+    distributionManagement:
+      snapshotRepository:
+        id: ossrh
+        layout: default
+        uniqueVersion: true
+        url: https://s01.oss.sonatype.org/content/repositories/snapshots
+    build:
+      plugins:
+        - groupId: org.sonatype.plugins
+          artifactId: nexus-staging-maven-plugin
+          version: 1.6.13
+          extensions: true
+          configuration:
+            serverId: ossrh
+            nexusUrl: https://s01.oss.sonatype.org
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-gpg-plugin
+          version: 3.1.0
+          # For publishing in Maven Central, GPG key must be published to one of following servers:
+          #  - keyserver.ubuntu.com
+          #  - keys.openpgp.org
+          #  - pgp.mit.edu
+          # For more information: https://central.sonatype.org/publish/requirements/gpg/#distributing-your-public-key
+          executions:
+            - id: sign-artifacts
+              phase: verify
+              goals: [ sign ]
+              configuration:
+                gpgArguments: !!pairs
+                  - arg: --pinentry-mode
+                  - arg: loopback
