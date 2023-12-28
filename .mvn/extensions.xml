@@ -3,6 +3,15 @@
 	<extension>
 		<groupId>io.takari.polyglot</groupId>
 		<artifactId>polyglot-yaml</artifactId>
-		<version>0.3.2</version>
+		<version>0.4.9</version>
 	</extension>
+    <extension>
+        <groupId>me.qoomon</groupId>
+        <artifactId>maven-git-versioning-extension</artifactId>
+        <!--
+            ATTENTION : Le Support de Java 8 a été supprimé depuis la v8.0.0
+            Dernière version (à date) compatible si vous compilez avec Java 8 : v7.4.0
+        -->
+        <version>9.3.3</version>
+    </extension>
 </extensions>

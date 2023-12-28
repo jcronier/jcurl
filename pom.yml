@@ -3,7 +3,7 @@ modelVersion: 4.0.0
 
 groupId: jcurl
 artifactId: jcurl
-version: 1.1.0-SNAPSHOT
+version: ${revision}
 packaging: jar
 
 name: jcURL
@@ -12,8 +12,12 @@ description: >
   It implements a subset of options from cURL (http://curl.haxx.se/docs/manpage.html)
 
 properties:
-  maven.compiler.target: 1.6
   maven.compiler.target: 1.8
+  # Default version when maven-git-versioning-extension is deactivated
+  # cf. https://github.com/qoomon/maven-git-versioning-extension#intellij&#45;&#45;-multi-modules-projects
+  revision: main-SNAPSHOT
+  # cf. https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+  project.build.outputTimestamp: ${git.commit.timestamp.datetime}
   project.build.sourceEncoding: UTF-8
   project.reporting.outputEncoding: ${project.build.sourceEncoding}
   maven.compiler.encoding: ${project.build.sourceEncoding}
@@ -35,6 +39,18 @@ build:
   - directory: src/main/resources
     filtering: true
   plugins:
+  - groupId: org.apache.maven.plugins
+    artifactId: maven-enforcer-plugin
+    version: 3.1.0
+    executions:
+    - id: enforce-java
+      goals:
+      - enforce
+      configuration:
+        rules:
+          requireJavaVersion:
+            # maven-git-versioning-extension is compatible with Java >= 11
+            version: 11
   - groupId: org.apache.maven.plugins
     artifactId: maven-compiler-plugin
     version: 3.5.1

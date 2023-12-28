@@ -1,6 +1,6 @@
 @set CURRENT_SCRIPT_DIR=%~dp0%\.
 
-@set VERSION=1-SNAPSHOT
+@set VERSION=main-SNAPSHOT
 
 @rem Setup with system properties for proxy and trust/key store
 
