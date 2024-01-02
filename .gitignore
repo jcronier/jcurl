@@ -76,3 +76,4 @@ local.properties
 *.ear
 \#*\#
 *.tmp.*
+/.git-versioned-pom.xml

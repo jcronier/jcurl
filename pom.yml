@@ -43,9 +43,11 @@ issueManagement:
 
 properties:
   maven.compiler.release: 8
+
   # Default version when maven-git-versioning-extension is deactivated
   # cf. https://github.com/qoomon/maven-git-versioning-extension#intellij&#45;&#45;-multi-modules-projects
-  revision: main-SNAPSHOT
+  revision: 9999-SNAPSHOT
+
   # cf. https://maven.apache.org/guides/mini/guide-reproducible-builds.html
   project.build.outputTimestamp: ${git.commit.timestamp.datetime}
   project.build.sourceEncoding: UTF-8
